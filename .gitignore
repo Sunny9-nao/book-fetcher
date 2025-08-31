@@ -21,5 +21,6 @@ ENV/
 covers/
 results.json
 # If your titles list is private, uncomment the next line
-# titles.txt
+titles.txt
+
 
