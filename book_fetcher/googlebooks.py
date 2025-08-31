@@ -1,15 +1,22 @@
 from __future__ import annotations
 
+"""Google Books 補完モジュール
+
+Open Library で不足しがちな「説明文・カテゴリ・出版社・発行日・ISBN・画像」
+などを、可能であれば Google Books から補います。
+"""
+
 from typing import Any, Dict, List, Optional
 
 from .models import BookInfo
 from .utils import http_get, parse_year_from_date
 
 
-GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes"
+GOOGLE_BOOKS_URL = "https://www.googleapis.com/books/v1/volumes"  # 検索API
 
 
 def google_image_links_to_cover_urls(image_links: Dict[str, Any]) -> Dict[str, str]:
+    """Googleの画像リンク形式を、s/m/lキーの辞書に変換する。"""
     if not image_links:
         return {}
     out: Dict[str, str] = {}
@@ -30,6 +37,7 @@ def google_image_links_to_cover_urls(image_links: Dict[str, Any]) -> Dict[str, s
 
 
 def gb_pick_isbn(industry_ids: Any) -> List[str]:
+    """GoogleのindustryIdentifiers から ISBN 候補（10/13桁）を抽出する。"""
     if not isinstance(industry_ids, list):
         return []
     vals: List[str] = []
@@ -55,6 +63,7 @@ def search_googlebooks(
     api_key: Optional[str] = None,
     timeout: int = 15,
 ) -> Dict[str, Any]:
+    """タイトル/著者/ISBN で Google Books を検索する。"""
     q_parts: List[str] = []
     if isbn:
         q_parts.append(f"isbn:{isbn}")
@@ -71,6 +80,7 @@ def search_googlebooks(
 
 
 def select_google_item(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """検索結果itemsから、最初の1件を取り出す。"""
     items = data.get("items") if isinstance(data, dict) else None
     if not items or not isinstance(items, list):
         return None
@@ -78,6 +88,7 @@ def select_google_item(data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
 
 
 def build_bookinfo_from_google(item: Dict[str, Any]) -> Optional[BookInfo]:
+    """GoogleのvolumeInfoから、BookInfo 形式へ詰め替える。"""
     if not item:
         return None
     vi = item.get("volumeInfo", {}) or {}
@@ -116,6 +127,7 @@ def augment_with_google(
     isbns_query: Optional[List[str]],
     api_key: Optional[str] = None,
 ) -> BookInfo:
+    """既存の BookInfo に、Googleから得た不足情報を「空欄埋め」で補完する。"""
     isbn = None
     if isbns_query:
         isbn = next((i for i in isbns_query if i and len(i) in (10, 13)), None)
@@ -177,4 +189,3 @@ def augment_with_google(
         info.cover_urls.setdefault(size_key, url)
 
     return info
-

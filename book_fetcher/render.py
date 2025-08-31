@@ -1,11 +1,17 @@
 from __future__ import annotations
 
+"""画面表示用のテキスト組み立て
+
+BookInfo の中身を、読みやすいテキストに変換します。
+"""
+
 from typing import List
 
 from .models import BookInfo
 
 
 def render_text(info: BookInfo) -> str:
+    """1冊の本の情報を、複数行のテキストに組み立てる。"""
     lines: List[str] = []
     lines.append(f"Title: {info.title}")
     if info.authors:
@@ -37,4 +43,3 @@ def render_text(info: BookInfo) -> str:
         lines.append("Description:")
         lines.append(info.description)
     return "\n".join(lines)
-

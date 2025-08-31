@@ -1,14 +1,19 @@
 from __future__ import annotations
 
+"""Open Library クライアント
+
+Open Library（無料・APIキー不要）の検索や詳細取得を担当します。
+"""
+
 from typing import Any, Dict, List, Optional
 
 from .models import BookCandidate
 from .utils import http_get
 
 
-OPENLIB_SEARCH_URL = "https://openlibrary.org/search.json"
-OPENLIB_BASE = "https://openlibrary.org"
-OPENLIB_COVER_BASE = "https://covers.openlibrary.org"
+OPENLIB_SEARCH_URL = "https://openlibrary.org/search.json"  # 検索APIのURL
+OPENLIB_BASE = "https://openlibrary.org"  # ページや詳細APIのベースURL
+OPENLIB_COVER_BASE = "https://covers.openlibrary.org"  # カバー画像のベースURL
 
 
 def search_openlibrary(
@@ -17,6 +22,7 @@ def search_openlibrary(
     year: Optional[int] = None,
     limit: int = 5,
 ) -> List[BookCandidate]:
+    """タイトル（と任意で著者・年）で本を検索し、候補一覧を返す。"""
     params = {"title": title, "limit": limit}
     if author:
         params["author"] = author
@@ -44,11 +50,13 @@ def search_openlibrary(
 
 
 def fetch_work_details(work_key: str) -> Dict[str, Any]:
+    """作品（work）の詳細JSONを取得する（例: /works/OL…W）。"""
     url = f"{OPENLIB_BASE}{work_key}.json"
     return http_get(url).json()
 
 
 def fetch_edition_details(edition_key: str) -> Dict[str, Any]:
+    """版（edition）の詳細JSONを取得する（例: OL…M）。"""
     url = f"{OPENLIB_BASE}/books/{edition_key}.json"
     return http_get(url).json()
 
@@ -57,6 +65,7 @@ def build_cover_urls(
     cover_id: Optional[int] = None,
     isbns: Optional[List[str]] = None,
 ) -> Dict[str, str]:
+    """カバー画像のURL（S/M/L）を組み立てる。cover_id か ISBN を利用。"""
     urls: Dict[str, str] = {}
     if cover_id:
         for size in ("S", "M", "L"):
@@ -71,9 +80,9 @@ def build_cover_urls(
 
 
 def choose_candidate(candidates: List[BookCandidate], index: int = 0) -> Optional[BookCandidate]:
+    """候補一覧から、指定のインデックス（なければ先頭）を選ぶ。"""
     if not candidates:
         return None
     if 0 <= index < len(candidates):
         return candidates[index]
     return candidates[0]
-

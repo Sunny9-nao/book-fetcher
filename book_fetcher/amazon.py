@@ -1,10 +1,18 @@
 from __future__ import annotations
 
+"""Amazon リンク生成
+
+APIやスクレイピングは行わず、「安全なリンク」を組み立てるだけです。
+- ISBN-10 が分かれば商品URL（/dp/ISBN10）を作成
+- 常に検索URL（タイトル＋著者）も作成
+"""
+
 from typing import Dict, List, Optional
 from urllib.parse import quote_plus
 
 
 def isbn13_to_isbn10(isbn13: str) -> Optional[str]:
+    """ISBN-13（978から始まるもの）を ISBN-10 に変換する。該当しなければ None。"""
     if not isinstance(isbn13, str):
         return None
     digits = "".join(ch for ch in isbn13 if ch.isdigit())
@@ -25,6 +33,15 @@ def build_amazon_urls(
     isbns: Optional[List[str]],
     domain: str = "co.jp",
 ) -> Dict[str, str]:
+    """Amazon の商品/検索リンクを作る。
+
+    引数:
+    - title: タイトル
+    - authors: 著者一覧（検索リンクに1名だけ利用）
+    - isbns: ISBN候補（ISBN-10があれば商品リンクに利用）
+    - domain: 国別ドメイン（co.jp, com など）
+    戻り値: {"product": 商品URL?, "search": 検索URL}
+    """
     host_map = {
         "co.jp": "https://www.amazon.co.jp",
         "com": "https://www.amazon.com",
@@ -58,4 +75,3 @@ def build_amazon_urls(
     q = quote_plus(" ".join([p for p in q_parts if p])) if q_parts else ""
     urls["search"] = f"{base}/s?k={q}&i=stripbooks"
     return urls
-

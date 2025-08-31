@@ -1,5 +1,11 @@
 from __future__ import annotations
 
+"""取得・統合サービス
+
+各API（Open Library / Google Books）から必要情報を集め、
+最終的に1冊の BookInfo にまとめる中核ロジックです。
+"""
+
 from typing import Any, Dict, List, Optional
 
 from .amazon import build_amazon_urls
@@ -30,6 +36,14 @@ def fetch_book_info(
     google_api_key: Optional[str] = None,
     amazon_domain: str = "co.jp",
 ) -> Optional[BookInfo]:
+    """タイトル（＋任意で著者・年）から1冊分の BookInfo を作る。
+
+    手順:
+    1) Open Library で候補→最適な1件を選ぶ
+    2) 作品/版の詳細で不足情報を補う
+    3) （指定時）Googleでさらに空欄を補完
+    4) Amazon のリンクを作成
+    """
     candidates = search_openlibrary(title=title, author=author, year=year, limit=max(5, pick_index + 1))
     cand = choose_candidate(candidates, pick_index)
     if not cand:
@@ -106,6 +120,10 @@ def fetch_book_info(
 
 
 def build_cover_filename(info: BookInfo, size: str) -> str:
+    """カバー画像の保存に使う、重複しにくいファイル名を作る。
+
+    例: タイトル_版キー（または作品キー/ISBN）_l.jpg
+    """
     from .utils import slugify_filename
 
     base = slugify_filename(info.title)
@@ -119,4 +137,3 @@ def build_cover_filename(info: BookInfo, size: str) -> str:
     if suffix:
         base = f"{base}_{suffix}"
     return f"{base}_{size}.jpg"
-

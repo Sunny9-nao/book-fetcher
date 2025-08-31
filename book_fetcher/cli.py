@@ -1,5 +1,12 @@
 from __future__ import annotations
 
+"""コマンドライン（CLI）
+
+非エンジニア向けの要点:
+- 引数（オプション）を受け取り、バッチ/単体処理を切り替えます。
+- 標準プリセット（--preset standard）で一発実行が可能です。
+"""
+
 import argparse
 import json
 import os
@@ -16,6 +23,7 @@ from .service import build_cover_filename, fetch_book_info
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """CLIの引数（オプション）定義を行う。"""
     parser = argparse.ArgumentParser(
         prog="book_fetcher",
         description="Fetch book info, cover image URLs, and summary by title using Open Library (and optionally Google Books).",
@@ -39,6 +47,11 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def apply_standard_preset(args: argparse.Namespace) -> None:
+    """標準プリセットを適用する。
+
+    - titles.txt があれば入力に採用
+    - JSON出力とカバー保存（L）を既定に
+    """
     if not args.input_file:
         default_in = "titles.txt"
         if os.path.exists(default_in):
@@ -54,11 +67,19 @@ def apply_standard_preset(args: argparse.Namespace) -> None:
 
 
 def _load_titles(path: str) -> List[str]:
+    """入力ファイル（1行1タイトル）を読み込み、空行と#行を除く。"""
     with open(path, "r", encoding="utf-8") as f:
         return [line.strip() for line in f if line.strip() and not line.strip().startswith("#")]
 
 
 def main(argv: Optional[List[str]] = None) -> int:
+    """CLIのメイン処理。
+
+    - 入力のバリデーション
+    - バッチ処理（--input-file）または単体処理
+    - 結果のファイル保存／画面出力
+    - カバー画像の保存
+    """
     parser = build_parser()
     args = parser.parse_args(argv)
 
@@ -234,4 +255,3 @@ def main(argv: Optional[List[str]] = None) -> int:
                 print(f"Failed to download cover: {e}", file=sys.stderr)
 
     return 0
-
