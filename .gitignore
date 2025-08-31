@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.pytest_cache/
+.mypy_cache/
+
+# Virtualenv
+.venv/
+venv/
+ENV/
+
+# OS / IDE
+.DS_Store
+.idea/
+.vscode/
+
+# Project outputs
+covers/
+results.json
+# If your titles list is private, uncomment the next line
+# titles.txt
+
